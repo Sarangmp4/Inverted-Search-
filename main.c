@@ -2,43 +2,105 @@
 
 int main(int argc, char *argv[])
 {
-  if (validate(argc, argv) == SUCCESS)
-  {
-    printf("Validation Success\n");
-  }
+    fnode *flist = NULL;
+    mnode *arr[27] = {NULL};
+
+    if (validate(argc, argv, &flist) == SUCCESS)
+    {
+        printf("Validation Success\n");
+        fnode *temp1= flist;
+
+        printf("Valid Files are : ");
+        while( temp1  != NULL)
+        {
+            printf("%s ",temp1->data);
+            temp1=temp1->link;
+        }
+
+
+    }
+    else
+    {
+        printf("Validation Failed\n");
+    }
+    return 0;
 }
 
-int validate(int argc, char *argv[])
-{
 
-  for (int i = 0; i <= argc; i++)
-  {
-    if ((!strcmp(strstr(argv[i], ".txt"), ".txt")))
+
+
+// validation function
+int validate(int argc, char *argv[], fnode **flist)
+{
+    if(argc>1)
     {
-      FILE *fptr_file = fopen(argv[i], "r");
-      if (fptr_file != NULL)
-      {
-        fseek(fptr_file, SEEK_END);
-        if (ftell(fptr_file) != 0)
+        for(int i=1; i<argc; i++)
         {
-          for (int j = i; j <= argc; j++)
-          {
-            if (!strcmp(argv[i], argv[j]))
+            if( strstr(argv[i],".txt") != NULL )
             {
-              return SUCCESS;
+                FILE *fptr = fopen(argv[i],"r");
+
+                if( fptr == NULL)
+                {
+                    continue;
+                }
+                else
+                {
+                    fseek(fptr,0,SEEK_END);
+
+                    if( ftell(fptr) == 0 )
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        fnode *new=malloc(sizeof(fnode));
+                        new->link=NULL;
+                        if( (*flist)==NULL ) //list is empty
+                        {
+                            strcpy(new->data,argv[i]);
+                            new->link=NULL;
+                            *flist=new;
+                        }
+                        else
+                        {
+                            fnode *temp = *flist;
+                            fnode *prev = NULL;
+                            while(temp != NULL)
+                            {
+                                if( !strcmp(argv[i],temp->data))
+                                {
+                                    printf("Duplicate file is found\n");
+                                    return FAILURE;
+                                }
+                                prev=temp;
+                                temp=temp->link;
+                            }
+                            if(temp==NULL)
+                            {
+                                fnode *new= malloc(sizeof(fnode));
+                                strcpy(new->data,argv[i]);
+                                new->link=NULL;
+                                prev->link=new;
+
+                            }
+
+
+                        }
+                    }
+                }
             }
             else
             {
-              printf("File exist two times");
-              return FAILURE;
+              continue;
             }
-          }
         }
-        else
-          return FAILURE;
-      }
-      else
+        return SUCCESS;
+
+    }
+    else
+    {
         return FAILURE;
     }
-  }
+
 }
